@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -113,37 +114,70 @@ public class BookServiceImplUnitTestNoDB
     }
 
     @Test
-    public void findAll()
+    public void findAll()   // complete
     {
+        Mockito.when(bookrepos.findAll())
+            .thenReturn(myBookList);
+
+        assertEquals(5, myBookList.size());
     }
 
     @Test
-    public void findBookById()
+    public void findBookById()  // complete
     {
+        Mockito.when(bookrepos.findById(20L))
+            .thenReturn(Optional.of(myBookList.get(0)));
+
+        assertEquals("Flatterland", bookService.findBookById(20).getTitle());
     }
 
     @Test(expected = ResourceNotFoundException.class)
-    public void notFindBookById()
+    public void notFindBookById()   // complete
+    {
+        Mockito.when(bookrepos.findById(100L))
+            .thenThrow(ResourceNotFoundException.class);
+
+        assertEquals("Flatterland", bookService.findBookById(100).getTitle());
+    }
+
+    @Test
+    public void delete()    // complete
+    {
+        Mockito.when(bookrepos.findById(103L))
+            .thenReturn(Optional.of(myBookList.get(0)));
+
+        Mockito.doNothing().when(bookrepos).deleteById(103L);
+
+        bookService.delete(103L);
+        assertEquals(5, myBookList.size());
+    }
+
+    @Test
+    public void save()  // fix
+    {
+        Section s1 = new Section("Fiction");
+        s1.setSectionid(1);
+
+        Book b1 = new Book("Flatterlands", "9780738206752", 2001, s1);
+
+        Book newbook = bookService.save(b1);
+
+        assertEquals("Flatterlands", newbook.getTitle());
+    }
+
+    @Test
+    public void update()    // fix
     {
     }
 
     @Test
-    public void delete()
+    public void deleteAll() // complete
     {
-    }
+        Mockito.doNothing()
+            .when(bookrepos)
+            .deleteAll();
 
-    @Test
-    public void save()
-    {
-    }
-
-    @Test
-    public void update()
-    {
-    }
-
-    @Test
-    public void deleteAll()
-    {
+        bookService.deleteAll();
+        assertEquals(5, myBookList.size());
     }
 }
