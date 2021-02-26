@@ -186,6 +186,29 @@ public class BookServiceImplUnitTestNoDB
     @Test
     public void update()    // fix
     {
+        Section s1 = new Section("Fiction");
+        s1.setSectionid(1);
+
+        Author a1 = new Author("John Test", "Mitchell Test");
+        a1.setAuthorid(1);
+
+        Book b1 = new Book("Flatterlands", "9780738206752", 2001, s1);
+        b1.setBookid(1000);
+        b1.getWrotes().add(new Wrote(a1, b1));
+
+        Mockito.when(bookrepos.save(any(Book.class))).thenReturn(b1);
+
+        Mockito.when(sectionRepository.findById(1L)).thenReturn(Optional.of(s1));
+
+        Mockito.when(authorRepository.findById(1L)).thenReturn(Optional.of(a1));
+
+        Mockito.when(bookrepos.findById(1000L)).thenReturn(Optional.of(b1));
+
+        long bookserviceid = bookService.save(b1).getBookid();
+
+        assertEquals(1000L, bookserviceid);
+
+
     }
 
     @Test
