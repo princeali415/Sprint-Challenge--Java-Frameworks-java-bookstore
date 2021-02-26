@@ -204,7 +204,7 @@ public class BookServiceImplUnitTestNoDB
 
         Mockito.when(bookrepos.findById(1000L)).thenReturn(Optional.of(b1));
 
-        long bookserviceid = bookService.save(b1).getBookid();
+        long bookserviceid = bookService.save(b1).getBookid(); 
 
         assertEquals(1000L, bookserviceid);
 
