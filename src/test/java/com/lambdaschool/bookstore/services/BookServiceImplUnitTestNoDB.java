@@ -6,7 +6,9 @@ import com.lambdaschool.bookstore.models.Author;
 import com.lambdaschool.bookstore.models.Book;
 import com.lambdaschool.bookstore.models.Section;
 import com.lambdaschool.bookstore.models.Wrote;
+import com.lambdaschool.bookstore.repository.AuthorRepository;
 import com.lambdaschool.bookstore.repository.BookRepository;
+import com.lambdaschool.bookstore.repository.SectionRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,9 +25,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = BookstoreApplicationTest.class)
+@SpringBootTest(classes = BookstoreApplicationTest.class,
+properties = {"command.line.runner.enabled=false"})
 public class BookServiceImplUnitTestNoDB
 {
 
@@ -33,7 +37,13 @@ public class BookServiceImplUnitTestNoDB
     private BookService bookService;
 
     @MockBean
+    private SectionRepository sectionRepository;
+
+    @MockBean
     private BookRepository bookrepos;
+
+    @MockBean
+    private AuthorRepository authorRepository;
 
     List<Book> myBookList = new ArrayList<>();
 
@@ -153,16 +163,24 @@ public class BookServiceImplUnitTestNoDB
     }
 
     @Test
-    public void save()  // fix
+    public void save()
     {
         Section s1 = new Section("Fiction");
         s1.setSectionid(1);
 
+        Author a1 = new Author("John Test", "Mitchell Test");
+        a1.setAuthorid(1);
+
         Book b1 = new Book("Flatterlands", "9780738206752", 2001, s1);
+        b1.getWrotes().add(new Wrote(a1, b1));
 
-        Book newbook = bookService.save(b1);
+        Mockito.when(bookrepos.save(any(Book.class))).thenReturn(b1);
 
-        assertEquals("Flatterlands", newbook.getTitle());
+        Mockito.when(sectionRepository.findById(1L)).thenReturn(Optional.of(s1));
+
+        Mockito.when(authorRepository.findById(1L)).thenReturn(Optional.of(a1));
+
+        assertEquals("Flatterlands", bookService.save(b1).getTitle());
     }
 
     @Test
